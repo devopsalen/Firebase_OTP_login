@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "900767107430",
+    "project_id": "apploginfirebase-210a3",
+    "storage_bucket": "apploginfirebase-210a3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:900767107430:android:f7b3b8844d49654211a0a7",
+        "android_client_info": {
+          "package_name": "com.example.firebase_authentication_alen"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArsdFxDHm6DopO1XYqYSDI99NNajWnOVk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
