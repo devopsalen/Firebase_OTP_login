@@ -38,7 +38,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^2.16.0
   firebase_auth: ^4.10.0
+  firebase_storage: ^11.2.7
   pinput: ^3.0.1
+  intl: ^0.18.1
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +69,8 @@ flutter:
   # assets:
   assets:
     - assets/images/img_login.png
+    - assets/images/login.png
+    - assets/images/register.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 

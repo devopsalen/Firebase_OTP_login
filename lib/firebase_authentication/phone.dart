@@ -26,6 +26,10 @@ class _MyPhoneState extends State<MyPhone> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Container(
         margin: const EdgeInsets.only(left: 25, right: 25),
         alignment: Alignment.center,
@@ -99,6 +103,7 @@ class _MyPhoneState extends State<MyPhone> {
                 width: double.infinity,
                 child: ElevatedButton(
                     onPressed: () async {
+                      print("requesting OTP");
                       await FirebaseAuth.instance.verifyPhoneNumber(
                         phoneNumber: '${countrycode.text + phone}',
                         verificationCompleted:

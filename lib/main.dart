@@ -1,5 +1,6 @@
 import 'package:firebase_authentication_alen/firebase_authentication/otp.dart';
 import 'package:firebase_authentication_alen/firebase_authentication/phone.dart';
+import 'package:firebase_authentication_alen/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -24,7 +25,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const MyPhone(),
+      // home: const MyPhone(),
+      home: const MyLogin(),
     );
   }
 }
