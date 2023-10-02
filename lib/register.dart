@@ -1,9 +1,13 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_authentication_alen/login.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
@@ -15,14 +19,37 @@ class MyRegister extends StatefulWidget {
 }
 
 class _MyRegisterState extends State<MyRegister> {
-  TextEditingController dateController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey();
 
-  XFile? pickedFile;
-  UploadTask? uploadTask;
-  String urlDownload = '';
+  final CollectionReference registration =
+      FirebaseFirestore.instance.collection('registration');
+  TextEditingController dateController = TextEditingController();
+  TextEditingController fname = TextEditingController();
+  TextEditingController lname = TextEditingController();
+
+  XFile? pickedFile; //for
+  PlatformFile? pickedfilePDF;
+  UploadTask? uploadTaskImage;
+  UploadTask? uploadTaskPDF;
+
+  String urlDownload1 = ''; ///image upload
+  String urlDownload2 = ''; ///pdf upload
+
   File? imageFile;
 
+
   // final ImagePicker picker = ImagePicker();
+
+  void addUser() {
+    final data = {
+      'fname': fname.text,
+      'lname': lname.text,
+      'dob': dateController.text,
+      'profile_pic': urlDownload1,
+      'id_proof': urlDownload2,
+    };
+    registration.add(data);
+  }
 
   @override
   void initState() {
@@ -62,128 +89,315 @@ class _MyRegisterState extends State<MyRegister> {
                   children: [
                     Container(
                       margin: const EdgeInsets.only(left: 35, right: 35),
-                      child: Column(
-                        children: [
-                          TextField(
-                            style: const TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Colors.white,
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Enter first name';
+                                }
+                              },
+                              controller: fname,
+                              keyboardType: TextInputType.name,
+                              inputFormatters: [
+                                // only accept letters from a to z
+                                FilteringTextInputFormatter(RegExp(r'[a-zA-Z]'), allow: true)
+                              ],
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Colors.black,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
-                                hintText: "First Name",
-                                hintStyle: const TextStyle(color: Colors.white),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          TextField(
-                            style: const TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Colors.white,
+                                  hintText: "First Name",
+                                  hintStyle:
+                                      const TextStyle(color: Colors.white),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  )),
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              controller: lname,
+                              keyboardType: TextInputType.name,
+                              inputFormatters: [
+                                // only accept letters from a to z
+                                FilteringTextInputFormatter(RegExp(r'[a-zA-Z]'), allow: true)
+                              ],
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Colors.black,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
-                                hintText: "Last Name",
-                                hintStyle: const TextStyle(color: Colors.white),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          TextField(
-                            controller: dateController,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.calendar_today),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Colors.white,
+                                  hintText: "Last Name",
+                                  hintStyle:
+                                      const TextStyle(color: Colors.white),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  )),
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Enter second name';
+                                }
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              controller: dateController,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                  prefixIcon: const Icon(Icons.calendar_today),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.white,
+                                    ),
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(
-                                    color: Colors.black,
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: const BorderSide(
+                                      color: Colors.black,
+                                    ),
                                   ),
-                                ),
-                                hintText: "Enter DOB",
-                                hintStyle: const TextStyle(color: Colors.white),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                            readOnly: true,
-                            onTap: () async {
-                              DateTime? pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate:
-                                      DateTime.now(), //get today's date
-                                  firstDate: DateTime(
-                                      2000), //DateTime.now() - not to allow to choose before today.
-                                  lastDate: DateTime(2101));
+                                  hintText: "Enter DOB",
+                                  hintStyle:
+                                      const TextStyle(color: Colors.white),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  )),
+                              readOnly: true,
+                              onTap: () async {
+                                DateTime? pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: DateTime.now(),
+                                    // initialDate:  (DateTime.now()), //get today's date  change this
+                                    firstDate: DateTime(
+                                        1940), //DateTime.now() - not to allow to choose before today.
+                                    lastDate: DateTime.now());
 
-                              if (pickedDate != null) {
-                                print(
-                                    pickedDate); //get the picked date in the format => 2022-07-04 00:00:00.000
-                                String formattedDate = DateFormat('dd-MM-yyyy')
-                                    .format(
-                                        pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
-                                print(
-                                    formattedDate); //formatted date output using intl package =>  2022-07-04
-                                //You can format date as per your need
+                                if (pickedDate != null) {
+                                  print(
+                                      pickedDate); //get the picked date in the format => 2022-07-04 00:00:00.000
+                                  String formattedDate =
+                                      DateFormat('dd-MM-yyyy').format(
+                                          pickedDate); // format date in required form here we use yyyy-MM-dd that means time is removed
+                                  print(
+                                      formattedDate); //formatted date output using intl package =>  2022-07-04
+                                  //You can format date as per your need
+                                  setState(() {
+                                    dateController.text =
+                                        formattedDate; //set formatted date to TextField value.
+                                    DateTime currentDate = DateTime.now();
+                                    /////////////////////////////////////////
+                                    int age =
+                                        currentDate.year - pickedDate.year;
+                                    int month1 = currentDate.month;
+                                    int month2 = pickedDate.month;
+                                    if (month2 > month1) {
+                                      age--;
+                                    } else if (month1 == month2) {
+                                      int day1 = currentDate.day;
+                                      int day2 = pickedDate.day;
+                                      if (day2 > day1) {
+                                        age--;
+                                      }
+                                    }
+                                    print("updated age : $age");
+                                  }); //set state closed
+                                } else {
+                                  print("Date is not selected");
+                                }
+                              }, // w
+                              validator: (value) {
+                                if (value!.isEmpty) {
+                                  return 'Select date of birth';
+                                }
+                              }, // hen true user cannot edit text
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                (urlDownload1 != '')
+                                    ? const Text('Image uploaded')
+                                    : const Text('Choose image'),
+                                const SizedBox(width: 30,),
+                                if (urlDownload1 == '')
+                                  Flexible(
+                                    child: ElevatedButton.icon(
+                                      onPressed: () {
+                                        _getFromGallery();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                          // backgroundColor: Colors.green.shade600,
+                                          backgroundColor:
+                                              const Color(0xff4c505b),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10))),
+                                      icon: const Icon(
+                                        // <-- Icon
+                                        Icons.upload,
+                                        size: 24.0,
+                                        color: Colors.white,
+                                      ),
+                                      label: const Text(
+                                        'Choose Profile Picture',
+                                        style: TextStyle(color: Colors.white),
+                                      ), // <-- Text
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            if (pickedFile != null && urlDownload1 == '')
+                              SizedBox(
+                                height: 200,
+                                child: Image.file(
+                                  File(pickedFile!.path),
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            if (pickedFile != null && urlDownload1 == '')
+                              ElevatedButton(
+                                  onPressed: uploadFile,
+                                  style: ElevatedButton.styleFrom(
+                                      // backgroundColor: Colors.green.shade600,
+                                      backgroundColor: const Color(0xff4c505b),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(10))),
+                                  child: const Text(
+                                    'Upload image',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
 
-                                setState(() {
-                                  dateController.text =
-                                      formattedDate; //set foratted date to TextField value.
-                                  print(DateTime.now().year -
-                                      pickedDate.year); //prints age
-                                });
-                              } else {
-                                print("Date is not selected");
-                              }
-                            }, // when true user cannot edit text
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              // const Text("Profile picture"),
-                              // (pickedFile != null)
-                              //     ? const Text('Image selected')
-                              //     : const Text('No image selected'),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            if (pickedFile != null && uploadTaskImage != null)
+                              buildProgress(),
 
-                              (urlDownload != '')
-                                  ? const Text('Image uploaded')
-                                  : const Text('Choose image'),
+                            /////////////////////////////////////////////////////
 
-                              if (urlDownload == '')
-                                ElevatedButton.icon(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                // (urlDownload2 != '')
+                                //     ? const Text('PDF uploaded'):
+                            const Text('Choose PDF'),
+                                const SizedBox(width: 30,),
+                                // if (urlDownload2 == '')
+                                  Flexible(
+                                    child: ElevatedButton.icon(
+                                      onPressed: () {
+                                        _getFromFile();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        // backgroundColor: Colors.green.shade600,
+                                          backgroundColor:
+                                          const Color(0xff4c505b),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(10))),
+                                      icon: const Icon(
+                                        // <-- Icon
+                                        Icons.upload,
+                                        size: 24.0,
+                                        color: Colors.white,
+                                      ),
+                                      label: const Text(
+                                        'Choose PDF file',
+                                        style: TextStyle(color: Colors.white),
+                                      ), // <-- Text
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            if (pickedfilePDF != null)
+                              ElevatedButton(
+                                  onPressed: uploadFilePDF,
+                                  style: ElevatedButton.styleFrom(
+                                    // backgroundColor: Colors.green.shade600,
+                                      backgroundColor: const Color(0xff4c505b),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                          BorderRadius.circular(10))),
+                                  child: const Text(
+                                    'Upload PDF File',
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            // if(pickedFile != null)
+                            // SizedBox(
+                            //   height: 200,
+                            //   child: Image.file(
+                            //     File(pickedFile!.path),
+                            //     width: double.infinity,
+                            //     fit: BoxFit.cover,
+                            //   ),
+                            // ),
+
+
+                            const SizedBox(
+                              height: 30,
+                            ),
+                            SizedBox(
+                              height: 45,
+                              width: double.infinity,
+                              child: ElevatedButton(
                                   onPressed: () {
-                                    _getFromGallery();
+                                    if (_formKey.currentState!.validate()) {
+                                      if (urlDownload1 == '') {
+                                        Fluttertoast.showToast(
+                                            msg: 'Upload image');
+                                      }
+                                      else if(urlDownload2 == ''){
+                                        Fluttertoast.showToast(
+                                            msg: 'Upload ID proof');
+                                      }
+                                      else {
+                                        print('Dob ${dateController.text}');
+                                        addUser();
+                                        clearText();
+                                        Fluttertoast.showToast(
+                                            msg: 'Registration Successful');
+                                        Future.delayed(const Duration(seconds: 2),(){
+                                          Navigator.push(context, MaterialPageRoute(builder: (context) => const MyLogin()));
+                                        });
+
+                                      }
+                                    }
                                   },
                                   style: ElevatedButton.styleFrom(
                                       // backgroundColor: Colors.green.shade600,
@@ -191,125 +405,42 @@ class _MyRegisterState extends State<MyRegister> {
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(10))),
-                                  icon: const Icon(
-                                    // <-- Icon
-                                    Icons.upload,
-                                    size: 24.0,
-                                    color: Colors.white,
-                                  ),
-                                  label: const Text(
-                                    'Choose Profile Picture',
+                                  child: const Text(
+                                    'Sign Up',
                                     style: TextStyle(color: Colors.white),
-                                  ), // <-- Text
-                                ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          if (pickedFile != null && urlDownload == '')
-                            SizedBox(
-                              height: 200,
-                              child: Image.file(
-                                File(pickedFile!.path),
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
+                                  )),
                             ),
-                          if (pickedFile != null && urlDownload == '')
-                            ElevatedButton(
-                                onPressed: uploadFile,
-                                style: ElevatedButton.styleFrom(
-                                    // backgroundColor: Colors.green.shade600,
-                                    backgroundColor: const Color(0xff4c505b),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10))),
-                                child: const Text(
-                                  'Upload image',
-                                  style: TextStyle(color: Colors.white),
-                                )),
-
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          if (pickedFile != null && uploadTask != null)
-                            buildProgress(),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          //   children: [
-                          //     Text("ID Proof"),
-                          //     ElevatedButton.icon(
-                          //       onPressed: _getFromGallery,
-                          //       style: ElevatedButton.styleFrom(
-                          //         // backgroundColor: Colors.green.shade600,
-                          //           backgroundColor: const Color(0xff4c505b),
-                          //           shape: RoundedRectangleBorder(
-                          //               borderRadius: BorderRadius.circular(10))),
-                          //       icon: const Icon( // <-- Icon
-                          //         Icons.upload,
-                          //         size: 24.0,
-                          //         color: Colors.white,
-                          //       ),
-                          //       label: Text('Choose image' ,style: TextStyle(color: Colors.white),), // <-- Text
-                          //     ),
-                          //
-                          //   ],
-                          // ),
-
-
-                          const SizedBox(
-                            height: 30,
-                          ),
-                          SizedBox(
-                            height: 45,
-                            width: double.infinity,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  print('Dob ${dateController.text}');
-                                  print("Age = $dateController");
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    // backgroundColor: Colors.green.shade600,
-                                    backgroundColor: const Color(0xff4c505b),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(10))),
-                                child: const Text(
-                                  'Sign Up',
-                                  style: TextStyle(color: Colors.white),
-                                )),
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              const MyLogin()));
-                                },
-                                style: const ButtonStyle(),
-                                child: const Text(
-                                  'Already have account?',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      decoration: TextDecoration.none,
-                                      color: Colors.white,
-                                      fontSize: 18),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const MyLogin()));
+                                  },
+                                  style: const ButtonStyle(),
+                                  child: const Text(
+                                    'Already have account?',
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                        decoration: TextDecoration.none,
+                                        color: Colors.white,
+                                        fontSize: 18),
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                        ],
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   ],
@@ -323,7 +454,7 @@ class _MyRegisterState extends State<MyRegister> {
   }
 
   Widget buildProgress() => StreamBuilder<TaskSnapshot>(
-      stream: uploadTask?.snapshotEvents,
+      stream: uploadTaskImage?.snapshotEvents,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final data = snapshot.data!;
@@ -352,6 +483,14 @@ class _MyRegisterState extends State<MyRegister> {
           return const SizedBox(height: 50);
         }
       });
+ /// to clear textformfields
+  void clearText() {
+    fname.clear();
+    lname.clear();
+    dateController.clear();
+    urlDownload1='';
+    urlDownload2='';
+  }
 
   /// Get from gallery
   Future _getFromGallery() async {
@@ -361,44 +500,67 @@ class _MyRegisterState extends State<MyRegister> {
     if (pickedFile != null) {
       setState(() {
         imageFile = File(pickedFile!.path);
-        print(pickedFile!.name);
-
-        ///   picked file name
+        print(pickedFile!.name);///   picked file name
         print(imageFile);
       });
     }
   }
 
-  /// Upload to firebase
+  /// Get from file
+  Future _getFromFile() async {
+    final result = await FilePicker.platform.pickFiles();
+    if(result != null) {
+      setState(() {
+        pickedfilePDF = result.files.first;
+        print(pickedfilePDF!.path);
+        print(pickedfilePDF!.name);
+      });
+    }
+  }
+  /// Upload PDF to firebase
+  Future<void> uploadFilePDF() async {
+    print('Uploading to Firebase Storage');
+    final path = 'pdf/${pickedfilePDF!.name}'; // Use pickedfilePDF!.name for the file name
+    final file = File(pickedfilePDF!.path!);
+
+    final ref = FirebaseStorage.instance.ref().child(path);
+
+    setState(() {
+      uploadTaskPDF = ref.putFile(file);
+    });
+
+    final snapshot = await uploadTaskPDF!.whenComplete(() {});
+    print('Upload complete');
+
+    urlDownload2 = await snapshot.ref.getDownloadURL();
+    print('Download link: $urlDownload2');
+
+    setState(() {
+      uploadTaskImage = null;
+    });
+  }
+
+  /// Upload Image to firebase
   Future<void> uploadFile() async {
     print('uploading to firebase');
-    final path = 'files/${pickedFile!.name}';
+    final path = 'images/${pickedFile!.name}';
     final file = File(pickedFile!.path);
 
     final ref = FirebaseStorage.instance.ref().child(path);
 
     setState(() {
-      uploadTask = ref.putFile(file);
+      uploadTaskImage = ref.putFile(file);
     });
 
-    final snapshot = await uploadTask!.whenComplete(() {});
+    final snapshot = await uploadTaskImage!.whenComplete(() {});
     print('upload complete');
 
-    urlDownload = await snapshot.ref.getDownloadURL();
-    print('Download link : $urlDownload');
+    urlDownload1 = await snapshot.ref.getDownloadURL();
+    print('Download link : $urlDownload1');
 
     setState(() {
-      uploadTask = null;
+      uploadTaskImage = null;
     });
   }
 
-//we can upload image from camera or from gallery based on parameter
-  // Future getImage(ImageSource media) async {
-  //   var img = await picker.pickImage(source: media);
-  //
-  //   setState(() {
-  //     image = img;
-  //     print(image);
-  //   });
-  // }
 }
