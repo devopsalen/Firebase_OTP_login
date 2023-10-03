@@ -36,8 +36,6 @@ class _MyRegisterState extends State<MyRegister> {
   String urlDownload2 = ''; ///pdf upload
 
   File? imageFile;
-
-
   // final ImagePicker picker = ImagePicker();
 
   void addUser() {
@@ -70,20 +68,23 @@ class _MyRegisterState extends State<MyRegister> {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          title: const Text('Create Account',
+        style: TextStyle(color: Colors.white, fontSize: 22)
+          )
         ),
         body: Stack(
           children: [
-            Container(
-              padding: const EdgeInsets.only(left: 35, top: 30),
-              child: const Text(
-                'Create\nAccount',
-                style: TextStyle(color: Colors.white, fontSize: 33),
-              ),
-            ),
+            // Container(
+            //   padding: const EdgeInsets.only(left: 35, top: 30),
+            //   child: const Text(
+            //     'Create\nAccount',
+            //     style: TextStyle(color: Colors.white, fontSize: 33),
+            //   ),
+            // ),
             SingleChildScrollView(
               child: Container(
                 padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).size.height * 0.28),
+                    top: MediaQuery.of(context).size.height * 0.23), //.28 previous
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -241,11 +242,32 @@ class _MyRegisterState extends State<MyRegister> {
                               height: 20,
                             ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 (urlDownload1 != '')
-                                    ? const Text('Image uploaded')
-                                    : const Text('Choose image'),
+                                    // ? const Text('Image uploaded',textAlign: TextAlign.left,)
+                                ? Container(
+                                  width: 200,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.white, // Border color
+                                      width: 1.0,           // Border width
+                                    ),
+                                    borderRadius: BorderRadius.circular(10.0), // Rounded corners
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 38.0 ,vertical:  10.0), // Add horizontal padding
+                                    child: Text(
+                                      'Image uploaded', // Hint text or content
+                                      style: TextStyle(
+                                        color: Colors.white, // Text color
+                                      ),
+                                    ),
+                                  ),
+                                )
+
+                                    :
+                                const Text('Choose image'),
                                 const SizedBox(width: 30,),
                                 if (urlDownload1 == '')
                                   Flexible(
@@ -307,15 +329,37 @@ class _MyRegisterState extends State<MyRegister> {
                               buildProgress(),
 
                             /////////////////////////////////////////////////////
+                            /// _getFromFile();
 
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // (urlDownload2 != '')
-                                //     ? const Text('PDF uploaded'):
-                            const Text('Choose PDF'),
+                                (urlDownload2 != '')
+                                // ? const Text('Image uploaded',textAlign: TextAlign.left,)
+                                    ? Container(
+                                  width: 200,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.white, // Border color
+                                      width: 1.0,           // Border width
+                                    ),
+                                    borderRadius: BorderRadius.circular(10.0), // Rounded corners
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 38.0 ,vertical:  10.0), // Add horizontal padding
+                                    child: Text(
+                                      'ID card uploaded', // Hint text or content
+                                      style: TextStyle(
+                                        color: Colors.white, // Text color
+                                      ),
+                                    ),
+                                  ),
+                                )
+
+                                    :
+                                const Text('Choose PDF file'),
                                 const SizedBox(width: 30,),
-                                // if (urlDownload2 == '')
+                                if (urlDownload2 == '')
                                   Flexible(
                                     child: ElevatedButton.icon(
                                       onPressed: () {
@@ -335,14 +379,21 @@ class _MyRegisterState extends State<MyRegister> {
                                         color: Colors.white,
                                       ),
                                       label: const Text(
-                                        'Choose PDF file',
+                                        'Choose ID card',
                                         style: TextStyle(color: Colors.white),
                                       ), // <-- Text
                                     ),
                                   ),
                               ],
                             ),
-                            if (pickedfilePDF != null)
+
+
+                            if (pickedfilePDF != null && urlDownload2 == '')
+                              Image.asset('assets/images/pdf.png'),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              if(urlDownload2 == '')
                               ElevatedButton(
                                   onPressed: uploadFilePDF,
                                   style: ElevatedButton.styleFrom(
@@ -352,7 +403,7 @@ class _MyRegisterState extends State<MyRegister> {
                                           borderRadius:
                                           BorderRadius.circular(10))),
                                   child: const Text(
-                                    'Upload PDF File',
+                                    'Upload ID Card',
                                     style: TextStyle(color: Colors.white),
                                   )),
                             const SizedBox(
@@ -533,7 +584,7 @@ class _MyRegisterState extends State<MyRegister> {
     print('Upload complete');
 
     urlDownload2 = await snapshot.ref.getDownloadURL();
-    print('Download link: $urlDownload2');
+    print('File Download link: $urlDownload2');
 
     setState(() {
       uploadTaskImage = null;
@@ -556,7 +607,7 @@ class _MyRegisterState extends State<MyRegister> {
     print('upload complete');
 
     urlDownload1 = await snapshot.ref.getDownloadURL();
-    print('Download link : $urlDownload1');
+    print('Image Download link : $urlDownload1');
 
     setState(() {
       uploadTaskImage = null;
