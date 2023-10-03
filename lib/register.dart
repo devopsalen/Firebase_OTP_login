@@ -36,8 +36,6 @@ class _MyRegisterState extends State<MyRegister> {
   String urlDownload2 = ''; ///pdf upload
 
   File? imageFile;
-
-
   // final ImagePicker picker = ImagePicker();
 
   void addUser() {
