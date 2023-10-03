@@ -409,15 +409,6 @@ class _MyRegisterState extends State<MyRegister> {
                             const SizedBox(
                               height: 20,
                             ),
-                            // if(pickedFile != null)
-                            // SizedBox(
-                            //   height: 200,
-                            //   child: Image.file(
-                            //     File(pickedFile!.path),
-                            //     width: double.infinity,
-                            //     fit: BoxFit.cover,
-                            //   ),
-                            // ),
 
 
                             const SizedBox(
