@@ -393,7 +393,7 @@ class _MyRegisterState extends State<MyRegister> {
                               const SizedBox(
                                 height: 20,
                               ),
-                              if(urlDownload2 == '')
+                            if (pickedfilePDF != null && urlDownload2 == '')
                               ElevatedButton(
                                   onPressed: uploadFilePDF,
                                   style: ElevatedButton.styleFrom(
