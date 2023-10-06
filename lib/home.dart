@@ -14,6 +14,14 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('Home'),
       ),
+      body: Column(
+        children: [
+          TextButton(
+            onPressed: () => throw Exception(),
+            child: const Text("Throw Test Exception"),
+          ),
+        ],
+      )
     );
   }
 }
